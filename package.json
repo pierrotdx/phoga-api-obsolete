@@ -20,5 +20,8 @@
     "watch": "nodemon"
   },
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^16.4.1"
+  }
 }
