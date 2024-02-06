@@ -2,8 +2,12 @@
   "extends": "@tsconfig/node20/tsconfig.json",
   "compilerOptions": {
     "allowJs": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "lib": ["DOM"],
     "outDir": "dist",
-    "sourceMap": true
+    "sourceMap": true,
+    "types": ["reflect-metadata", "node"]
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules"]
