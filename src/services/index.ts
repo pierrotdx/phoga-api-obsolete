@@ -1,2 +1,1 @@
-export * from "./dumbA.service.js";
-export * from "./dumbB.service.js";
+export * from "./google-cloud/index.js";

@@ -3,8 +3,7 @@ const CONTROLLER_TYPES = {
 };
 
 const SERVICE_TYPES = {
-  DumbAService: Symbol.for("DumbAService"),
-  DumbBService: Symbol.for("DumbBService"),
+  GoogleStorageService: Symbol.for("GoogleStorageService"),
 };
 
 const TYPES = {
