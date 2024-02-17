@@ -1,14 +1,14 @@
 import "reflect-metadata";
 import { Container } from "inversify";
 import { TYPES } from "./types.js";
-import { DumbController } from "./controllers/index.js";
+import { PhotoController } from "./controllers/index.js";
 import { GCStorageService } from "./services/index.js";
+import { CloudStorageInterface } from "./models/index.js";
 
 const singletons = new Container();
-singletons.bind<DumbController>(TYPES.DumbController).to(DumbController);
+singletons.bind<PhotoController>(TYPES.PhotoController).to(PhotoController);
 
 singletons
-  .bind<GCStorageService>(TYPES.GoogleStorageService)
+  .bind<CloudStorageInterface>(TYPES.GoogleStorageService)
   .to(GCStorageService);
-
 export { singletons };

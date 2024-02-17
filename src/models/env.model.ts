@@ -19,3 +19,5 @@ const getEnvVariable = <T = string>(
 };
 
 export const HTTP_SERVER_PORT = getEnvVariable("HTTP_SERVER_PORT", parseInt);
+
+export const PHOTOS_BUCKET = getEnvVariable("PHOTOS_BUCKET");

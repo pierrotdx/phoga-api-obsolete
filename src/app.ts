@@ -1,16 +1,15 @@
 import "dotenv/config";
 import express from "express";
 import { HTTP_SERVER_PORT } from "./models/env.model.js";
-import { appRouter } from "./routers/appRouter.js";
-import { singletons } from "./inversify.config.js";
-import { GCStorageService } from "./services/index.js";
-import { TYPES } from "./types.js";
+import { appRouter } from "./routers/app.router.js";
+import bodyParser from "body-parser";
+import cors from "cors";
 
 const app = express();
 
-const googleStorageService = singletons.get<GCStorageService>(
-  TYPES.GoogleStorageService
-);
+app.use(cors());
+
+app.use(bodyParser.json());
 
 app.use("/", appRouter);
 

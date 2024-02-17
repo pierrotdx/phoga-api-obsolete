@@ -1,5 +1,5 @@
 const CONTROLLER_TYPES = {
-  DumbController: Symbol.for("DumbController"),
+  PhotoController: Symbol.for("PhotoController"),
 };
 
 const SERVICE_TYPES = {

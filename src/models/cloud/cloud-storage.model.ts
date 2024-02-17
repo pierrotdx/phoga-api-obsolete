@@ -1,8 +1,21 @@
-import { Bucket } from "@google-cloud/storage";
+import { Readable, Writable } from "node:stream";
+import {
+  CloudBucket,
+  CloudFile,
+  UploadFileParams,
+  UploadFileOptions,
+} from "./cloud-bucket.model.js";
 
-export interface CloudStorageInterface<StorageClient> {
-  client: StorageClient;
-  getBuckets: () => Promise<unknown[]>;
-  getBucket: (bucketName: string) => unknown;
-  uploadFile: (bucketName: string, isPublic: boolean) => Promise<unknown>;
+export interface CloudStorageInterface {
+  client: unknown;
+  getBuckets: () => Promise<CloudBucket[]>;
+  getBucket: (bucketName: CloudBucket["name"]) => CloudBucket;
+  getFile: (
+    fileName: CloudFile["name"],
+    bucketName: CloudBucket["name"]
+  ) => Promise<Readable>;
+  streamUploadFile: (
+    params: UploadFileParams,
+    options?: UploadFileOptions
+  ) => Writable;
 }
