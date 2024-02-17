@@ -3,9 +3,12 @@ import express from "express";
 import { HTTP_SERVER_PORT } from "./models/env.model.js";
 import { appRouter } from "./routers/app.router.js";
 import bodyParser from "body-parser";
+import helmet from "helmet";
 import cors from "cors";
 
 const app = express();
+
+app.use(helmet());
 
 app.use(cors());
 

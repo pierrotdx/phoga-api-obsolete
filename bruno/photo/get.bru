@@ -9,10 +9,3 @@ get {
   body: none
   auth: none
 }
-
-script:post-response {
-  const body = res.getBody();
-  const result = body.json();
-  console.log(result);
-  
-}
