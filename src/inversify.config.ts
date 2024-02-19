@@ -1,14 +1,29 @@
 import "reflect-metadata";
-import { Container } from "inversify";
+import "dotenv/config";
+
+import { Container, ContainerModule } from "inversify";
 import { TYPES } from "./types.js";
 import { PhotoController } from "./controllers/index.js";
-import { GCStorageService } from "./services/index.js";
-import { CloudStorageInterface } from "./models/index.js";
+import { EnvService, GCStorageService } from "./services/index.js";
+import { CloudStorageInterface, EnvInterface } from "./models/index.js";
 
-const singletons = new Container();
-singletons.bind<PhotoController>(TYPES.PhotoController).to(PhotoController);
+export const constantsContainerModule = new ContainerModule((bind) => {
+  bind<NodeJS.ProcessEnv>(TYPES.Env).toConstantValue(process.env);
+});
 
-singletons
-  .bind<CloudStorageInterface>(TYPES.GoogleStorageService)
-  .to(GCStorageService);
-export { singletons };
+export const controllersContainerModule = new ContainerModule((bind) => {
+  bind<PhotoController>(TYPES.PhotoController).to(PhotoController);
+});
+
+export const servicesContainerModule = new ContainerModule((bind) => {
+  bind<CloudStorageInterface>(TYPES.GoogleStorageService).to(GCStorageService);
+  bind<EnvInterface>(TYPES.EnvService).to(EnvService);
+});
+
+// https://github.com/inversify/InversifyJS/blob/master/wiki/recipes.md#overriding-bindings-on-unit-tests
+export const singletons = new Container();
+singletons.load(
+  constantsContainerModule,
+  controllersContainerModule,
+  servicesContainerModule
+);

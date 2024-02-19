@@ -4,16 +4,22 @@ import formidable from "formidable";
 import VolatileFile from "formidable/VolatileFile.js";
 
 import { TYPES } from "../types.js";
-import { CloudStorageInterface, PHOTOS_BUCKET } from "../models/index.js";
+import { CloudStorageInterface } from "../models/index.js";
 import { GetPhotoValidator } from "../validators/photo.validator.js";
 import { validateOrReject } from "class-validator";
+import { EnvService } from "../services/env.service.js";
 
 @injectable()
 export class PhotoController {
+  private readonly PHOTOS_BUCKET;
+
   constructor(
     @inject(TYPES.GoogleStorageService)
-    private readonly cloudStorageService: CloudStorageInterface
-  ) {}
+    private readonly cloudStorageService: CloudStorageInterface,
+    @inject(TYPES.EnvService) private readonly envService: EnvService
+  ) {
+    this.PHOTOS_BUCKET = this.envService.PHOTOS_BUCKET;
+  }
 
   readonly getPhoto = async (req: Request, res: Response) => {
     try {
@@ -21,7 +27,7 @@ export class PhotoController {
       await validateOrReject(validator);
       const photoReadable = await this.cloudStorageService.getFile(
         validator.name,
-        PHOTOS_BUCKET
+        this.PHOTOS_BUCKET
       );
       res.json(photoReadable);
     } catch (err) {
@@ -55,7 +61,7 @@ export class PhotoController {
 
     const destStream = this.cloudStorageService.streamUploadFile(
       {
-        bucketName: PHOTOS_BUCKET,
+        bucketName: this.PHOTOS_BUCKET,
         fileName,
       },
       { isPublic: true }
