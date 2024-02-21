@@ -25,7 +25,7 @@ export class PhotoController {
     try {
       const validator = new GetPhotoValidator(req);
       await validateOrReject(validator);
-      const photoReadable = await this.cloudStorageService.getFile(
+      const photoReadable = await this.cloudStorageService.streamReadFile(
         validator.name,
         this.PHOTOS_BUCKET
       );

@@ -10,7 +10,7 @@ export interface CloudStorageInterface {
   client: unknown;
   getBuckets: () => Promise<CloudBucket[]>;
   getBucket: (bucketName: CloudBucket["name"]) => CloudBucket;
-  getFile: (
+  streamReadFile: (
     fileName: CloudFile["name"],
     bucketName: CloudBucket["name"]
   ) => Promise<Readable>;

@@ -8,8 +8,8 @@
   "scripts": {
     "build": "npx tsc",
     "start": "npm run build && node dist/app.js",
-    "test": "jest",
-    "watch": "nodemon"
+    "test": "jest --detectOpenHandles --verbose --silent",
+    "watch": "nodemon --trade-deprecation"
   },
   "dependencies": {
     "@google-cloud/storage": "^7.7.0",

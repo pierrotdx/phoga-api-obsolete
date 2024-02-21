@@ -5,15 +5,15 @@ import { Container } from "inversify";
 
 describe("envService", () => {
   let envService: EnvService;
-  let singletonsMock: Container | null;
+  let mockSingletons: Container | null;
 
   beforeEach(() => {
-    const envMock = getSingletonsMock().get<NodeJS.ProcessEnv>(TYPES.Env);
-    envService = new EnvService(envMock);
+    const mockEnv = getMockSingletons().get<NodeJS.ProcessEnv>(TYPES.Env);
+    envService = new EnvService(mockEnv);
   });
 
   afterEach(() => {
-    singletonsMock = null;
+    mockSingletons = null;
   });
 
   describe("getEnvVariable", () => {
@@ -51,10 +51,10 @@ const dumbEnv: NodeJS.ProcessEnv = {
   [envVarWithUndefinedValue]: undefined,
 };
 
-const getSingletonsMock = () => {
-  const singletonsMock = new Container();
-  singletonsMock.load(constantsContainerModule);
-  singletonsMock.unbind(TYPES.Env);
-  singletonsMock.bind(TYPES.Env).toConstantValue(dumbEnv);
-  return singletonsMock;
+const getMockSingletons = () => {
+  const mockSingletons = new Container();
+  mockSingletons.load(constantsContainerModule);
+  mockSingletons.unbind(TYPES.Env);
+  mockSingletons.bind(TYPES.Env).toConstantValue(dumbEnv);
+  return mockSingletons;
 };
