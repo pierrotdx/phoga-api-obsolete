@@ -1,20 +1,23 @@
-import { constantsContainerModule } from "../inversify.config.js";
 import { TYPES } from "../types.js";
 import { EnvService } from "./env.service.js";
+import { LoggerService } from "./logger.service.js";
+import { getMockSingletons } from "../jest.common.js";
 import { Container } from "inversify";
 
+const [dumbEnvVarName1, envVarWithUndefinedValue] = [
+  "dumbEnvVarName1",
+  "envVarWithUndefinedValue",
+];
+
+const dumbEnv: NodeJS.ProcessEnv = {
+  [dumbEnvVarName1]: "dumb value 1",
+  [envVarWithUndefinedValue]: undefined,
+};
+
 describe("envService", () => {
-  let envService: EnvService;
-  let mockSingletons: Container | null;
-
-  beforeEach(() => {
-    const mockEnv = getMockSingletons().get<NodeJS.ProcessEnv>(TYPES.Env);
-    envService = new EnvService(mockEnv);
-  });
-
-  afterEach(() => {
-    mockSingletons = null;
-  });
+  const mockSingletons = getMockSingletons(dumbEnv);
+  const loggerService = mockSingletons.get<LoggerService>(TYPES.LoggerService);
+  const envService = mockSingletons.get<EnvService>(TYPES.EnvService);
 
   describe("getEnvVariable", () => {
     it("should return the value corresponding to the env name variable if it exists", () => {
@@ -34,27 +37,10 @@ describe("envService", () => {
     });
 
     it("should warn if no value has been found and no default value is given", () => {
-      const warnSpy = jest.spyOn(global.console, "warn");
+      const warnSpy = jest.spyOn(loggerService, "warn");
       envService["getEnvVariable"]("dumb key name");
       expect(warnSpy).toHaveBeenCalled();
       expect.assertions(1);
     });
   });
 });
-
-const [dumbEnvVarName1, envVarWithUndefinedValue] = [
-  "dumbEnvVarName1",
-  "envVarWithUndefinedValue",
-];
-const dumbEnv: NodeJS.ProcessEnv = {
-  [dumbEnvVarName1]: "dumb value 1",
-  [envVarWithUndefinedValue]: undefined,
-};
-
-const getMockSingletons = () => {
-  const mockSingletons = new Container();
-  mockSingletons.load(constantsContainerModule);
-  mockSingletons.unbind(TYPES.Env);
-  mockSingletons.bind(TYPES.Env).toConstantValue(dumbEnv);
-  return mockSingletons;
-};

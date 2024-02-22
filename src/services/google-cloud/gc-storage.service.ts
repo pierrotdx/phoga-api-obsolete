@@ -1,22 +1,33 @@
 import { Storage } from "@google-cloud/storage";
-import { injectable } from "inversify";
-import { CloudStorageInterface } from "../../models/index.js";
+import { inject, injectable } from "inversify";
+import { CloudStorageInterface, LoggerInterface } from "../../models/index.js";
 import {
   CloudBucket,
   UploadFileParams,
   UploadFileOptions,
 } from "../../models/cloud/cloud-bucket.model.js";
+import { TYPES } from "../../types.js";
 
 @injectable()
 export class GCStorageService implements CloudStorageInterface {
   client = new Storage();
 
+  constructor(
+    @inject(TYPES.LoggerService) private readonly loggerService: LoggerInterface
+  ) {}
+
   private getGcBucket = (bucketName: string) => {
     try {
       return this.client.bucket(bucketName);
-    } catch (error) {
-      console.error("[error]", error);
-      throw error;
+    } catch (err) {
+      if (err instanceof Error) {
+        this.loggerService.error(err);
+        throw err;
+      } else {
+        const error = new Error(JSON.stringify(err));
+        this.loggerService.error(error);
+        throw error;
+      }
     }
   };
 
@@ -60,17 +71,14 @@ export class GCStorageService implements CloudStorageInterface {
   };
 
   private onStreamUploadFileClose = (params: UploadFileParams) => () => {
-    console.log(
+    this.loggerService.info(
       `[gc]: successfully uploaded '${params.fileName}' to '${params.bucketName}'`
     );
   };
 
   private onStreamUploadFileError =
     (params: UploadFileParams) => (err: Error) => {
-      console.error(
-        `[gc]: failed uploading '${params.fileName}' to '${params.bucketName}'`
-      );
-      console.error(`[gc]: uploading error: `, err);
+      this.loggerService.error(err);
       throw err;
     };
 }

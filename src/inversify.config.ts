@@ -20,13 +20,19 @@ export const constantsContainerModule = new ContainerModule((bind) => {
 });
 
 export const controllersContainerModule = new ContainerModule((bind) => {
-  bind<PhotoController>(TYPES.PhotoController).to(PhotoController);
+  bind<PhotoController>(TYPES.PhotoController)
+    .to(PhotoController)
+    .inSingletonScope();
 });
 
 export const servicesContainerModule = new ContainerModule((bind) => {
-  bind<CloudStorageInterface>(TYPES.GoogleStorageService).to(GCStorageService);
-  bind<EnvInterface>(TYPES.EnvService).to(EnvService);
-  bind<LoggerInterface>(TYPES.LoggerService).to(LoggerService);
+  bind<CloudStorageInterface>(TYPES.GoogleStorageService)
+    .to(GCStorageService)
+    .inSingletonScope();
+  bind<EnvInterface>(TYPES.EnvService).to(EnvService).inSingletonScope();
+  bind<LoggerInterface>(TYPES.LoggerService)
+    .to(LoggerService)
+    .inSingletonScope();
 });
 
 // https://github.com/inversify/InversifyJS/blob/master/wiki/recipes.md#overriding-bindings-on-unit-tests

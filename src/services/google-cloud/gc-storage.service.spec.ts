@@ -3,38 +3,35 @@ import { GCStorageService } from "./gc-storage.service.js";
 import { UploadFileParams } from "../../models/cloud/cloud-bucket.model.js";
 import { FileOptions } from "buffer";
 import { Writable } from "node:stream";
+import { commonDumbError, commonMockSingleton } from "../../jest.common.js";
+import { TYPES } from "../../types.js";
+import { LoggerInterface } from "../../models/logger.model.js";
 
 const dumbStorage = new Storage();
 const dumbGcBucket = new Bucket(dumbStorage, "dumbBucket");
 const dumbFileName = "fileName";
 const dumbFile: File = new File(dumbGcBucket, dumbFileName + ".jpg");
-const dumbError = new Error("dumb error");
 
 describe("gc-storage.service", () => {
-  let gcStorageService: GCStorageService;
+  const loggerService = commonMockSingleton.get<LoggerInterface>(
+    TYPES.LoggerService
+  );
+  const gcStorageService = commonMockSingleton.get<GCStorageService>(
+    TYPES.GoogleStorageService
+  );
 
-  let clientBucketSpy: jest.SpyInstance;
-
-  let bucketGetFilesSpy: jest.SpyInstance;
-
-  let getGcBucketSpy: jest.SpyInstance;
-  let getBucketsSpy: jest.SpyInstance;
-  let getFilesFromBucket: jest.SpyInstance;
-
-  beforeEach(() => {
-    gcStorageService = new GCStorageService();
-
-    clientBucketSpy = jest.spyOn(gcStorageService.client, "bucket");
-
-    bucketGetFilesSpy = jest.spyOn(dumbGcBucket as Bucket, "getFiles");
-
-    getGcBucketSpy = jest.spyOn(gcStorageService as any, "getGcBucket");
-    getBucketsSpy = jest.spyOn(gcStorageService, "getBuckets");
-    getFilesFromBucket = jest.spyOn(
-      gcStorageService as any,
-      "getFilesFromBucket"
-    );
-  });
+  const errorLogSpy = jest.spyOn(loggerService, "error");
+  const clientBucketSpy = jest.spyOn(gcStorageService.client, "bucket");
+  const bucketGetFilesSpy: jest.SpyInstance = jest.spyOn(
+    dumbGcBucket as Bucket,
+    "getFiles"
+  );
+  const getGcBucketSpy = jest.spyOn(gcStorageService as any, "getGcBucket");
+  const getBucketsSpy = jest.spyOn(gcStorageService, "getBuckets");
+  const getFilesFromBucket = jest.spyOn(
+    gcStorageService as any,
+    "getFilesFromBucket"
+  );
 
   describe("getGcBucket", () => {
     it("should call the cloud-client-function `bucket`", () => {
@@ -43,14 +40,26 @@ describe("gc-storage.service", () => {
       expect.assertions(1);
     });
 
-    it("should throw when the cloud client throws", () => {
+    it("should log and throw when the cloud client throws", () => {
       clientBucketSpy.mockImplementationOnce(() => {
-        throw new Error("dumb error");
+        throw commonDumbError;
       });
       expect(() => {
         gcStorageService["getGcBucket"]("test");
       }).toThrow();
-      expect.assertions(1);
+      expect(errorLogSpy).toHaveBeenCalled();
+      expect.assertions(2);
+    });
+
+    it("should convert the message received into error, and then log and throw it", () => {
+      clientBucketSpy.mockImplementationOnce(() => {
+        throw "error message";
+      });
+      expect(() => {
+        gcStorageService["getGcBucket"]("test");
+      }).toThrow();
+      expect(errorLogSpy).toHaveBeenCalled();
+      expect.assertions(2);
     });
   });
 
@@ -167,9 +176,9 @@ describe("gc-storage.service", () => {
       );
       try {
         gcStorageService.streamUploadFile(dumbParams);
-        dumbWriteStream.emit("error", dumbError);
+        dumbWriteStream.emit("error", commonDumbError);
       } catch (err) {
-        expect(err).toBe(dumbError);
+        expect(err).toBe(commonDumbError);
       }
 
       expect(callBackFn).toHaveBeenCalled();

@@ -4,11 +4,10 @@ import formidable from "formidable";
 import VolatileFile from "formidable/VolatileFile.js";
 
 import { TYPES } from "../types.js";
-import { CloudStorageInterface } from "../models/index.js";
+import { CloudStorageInterface, LoggerInterface } from "../models/index.js";
 import { GetPhotoValidator } from "../validators/photo.validator.js";
 import { validateOrReject } from "class-validator";
 import { EnvService } from "../services/env.service.js";
-import { LoggerService } from "../services/logger.service.js";
 
 @injectable()
 export class PhotoController {
@@ -18,7 +17,7 @@ export class PhotoController {
     @inject(TYPES.GoogleStorageService)
     private readonly cloudStorageService: CloudStorageInterface,
     @inject(TYPES.EnvService) private readonly envService: EnvService,
-    @inject(TYPES.LoggerService) private readonly loggerService: LoggerService
+    @inject(TYPES.LoggerService) private readonly loggerService: LoggerInterface
   ) {
     this.PHOTOS_BUCKET = this.envService.PHOTOS_BUCKET;
   }
@@ -31,8 +30,6 @@ export class PhotoController {
         validator.name,
         this.PHOTOS_BUCKET
       );
-      const err = new Error("this is the error message");
-      this.loggerService.error(err);
       res.json(photoReadable);
     } catch (err) {
       console.error(err);

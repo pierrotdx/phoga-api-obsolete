@@ -1,6 +1,7 @@
 import { inject, injectable } from "inversify";
 import { TYPES } from "../types.js";
-import { EnvInterface } from "../models/index.js";
+import { EnvInterface, LoggerInterface } from "../models/index.js";
+import { LoggerService } from "./logger.service.js";
 
 @injectable()
 export class EnvService implements EnvInterface {
@@ -9,7 +10,10 @@ export class EnvService implements EnvInterface {
 
   private readonly ENV: NodeJS.ProcessEnv;
 
-  constructor(@inject(TYPES.Env) private readonly env: NodeJS.ProcessEnv) {
+  constructor(
+    @inject(TYPES.Env) private readonly env: NodeJS.ProcessEnv,
+    @inject(TYPES.LoggerService) private readonly loggerService: LoggerInterface
+  ) {
     this.ENV = env;
     this.HTTP_SERVER_PORT = this.getEnvVariable("HTTP_SERVER_PORT");
     this.PHOTOS_BUCKET = this.getEnvVariable("PHOTOS_BUCKET");
@@ -26,7 +30,9 @@ export class EnvService implements EnvInterface {
     } else if (defaultValue !== undefined) {
       return defaultValue;
     } else {
-      console.warn(`environment variable: \"${varName}\" is undefined`);
+      this.loggerService.warn(
+        `environment variable: \"${varName}\" is undefined`
+      );
       return "";
     }
   };
