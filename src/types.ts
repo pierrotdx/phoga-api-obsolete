@@ -9,6 +9,7 @@ const CONTROLLER_TYPES = {
 const SERVICE_TYPES = {
   EnvService: Symbol.for("EnvService"),
   GoogleStorageService: Symbol.for("GoogleStorageService"),
+  LoggerService: Symbol.for("LoggerService"),
 };
 
 const TYPES = {

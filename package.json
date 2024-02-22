@@ -23,7 +23,9 @@
     "install": "^0.13.0",
     "inversify": "^6.0.2",
     "ramda": "^0.29.1",
-    "reflect-metadata": "^0.2.1"
+    "reflect-metadata": "^0.2.1",
+    "winston": "^3.11.0",
+    "winston-daily-rotate-file": "^5.0.0"
   },
   "devDependencies": {
     "@tsconfig/node20": "^20.1.2",
