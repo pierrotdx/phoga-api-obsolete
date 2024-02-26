@@ -3,8 +3,8 @@ import {
   constantsContainerModule,
   servicesContainerModule,
   controllersContainerModule,
-} from "./inversify.config.js";
-import { TYPES } from "./types.js";
+} from "./inversify/inversify.config.js";
+import { TYPES } from "./inversify/index.js";
 import { LogData, LoggerInterface } from "./models/logger.model.js";
 
 const bindMockEnv = (container: Container, env?: NodeJS.ProcessEnv) => {

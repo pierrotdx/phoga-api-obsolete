@@ -7,8 +7,8 @@ import { LogData, LoggerInterface } from "../models/logger.model.js";
 export class LoggerService implements LoggerInterface {
   private readonly logger: winston.Logger;
 
-  private readonly consoleTransport: winston.transport;
-  private readonly localFileTransport: winston.transport;
+  public readonly consoleTransport: winston.transport;
+  public readonly localFileTransport: winston.transport;
 
   constructor(silent = false) {
     this.logger = winston.createLogger();

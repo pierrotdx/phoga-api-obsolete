@@ -1,7 +1,6 @@
 import { inject, injectable } from "inversify";
-import { TYPES } from "../types.js";
+import { TYPES } from "../inversify/index.js";
 import { EnvInterface, LoggerInterface } from "../models/index.js";
-import { LoggerService } from "./logger.service.js";
 
 @injectable()
 export class EnvService implements EnvInterface {

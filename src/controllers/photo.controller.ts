@@ -1,10 +1,10 @@
 import { inject, injectable } from "inversify";
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import formidable from "formidable";
 import VolatileFile from "formidable/VolatileFile.js";
 
-import { TYPES } from "../types.js";
-import { CloudStorageInterface, LoggerInterface } from "../models/index.js";
+import { TYPES } from "../inversify/index.js";
+import { CloudStorageInterface } from "../models/index.js";
 import { GetPhotoValidator } from "../validators/photo.validator.js";
 import { validateOrReject } from "class-validator";
 import { EnvService } from "../services/env.service.js";
@@ -16,8 +16,7 @@ export class PhotoController {
   constructor(
     @inject(TYPES.GoogleStorageService)
     private readonly cloudStorageService: CloudStorageInterface,
-    @inject(TYPES.EnvService) private readonly envService: EnvService,
-    @inject(TYPES.LoggerService) private readonly loggerService: LoggerInterface
+    @inject(TYPES.EnvService) private readonly envService: EnvService
   ) {
     this.PHOTOS_BUCKET = this.envService.PHOTOS_BUCKET;
   }
@@ -38,16 +37,11 @@ export class PhotoController {
   };
 
   readonly createPhoto = async (req: Request, res: Response) => {
-    try {
-      const form = formidable({
-        fileWriteStreamHandler: this.createPhotoWriteStreamHandler,
-      });
-      await form.parse(req);
-      res.json(true);
-    } catch (err) {
-      console.error(err);
-      res.json(err);
-    }
+    const form = formidable({
+      fileWriteStreamHandler: this.createPhotoWriteStreamHandler,
+    });
+    await form.parse(req);
+    res.json(true);
   };
 
   private readonly createPhotoWriteStreamHandler = (file?: VolatileFile) => {

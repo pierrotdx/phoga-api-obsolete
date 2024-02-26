@@ -1,8 +1,7 @@
-import { TYPES } from "../types.js";
+import { TYPES } from "../inversify/index.js";
 import { EnvService } from "./env.service.js";
 import { LoggerService } from "./logger.service.js";
 import { getMockSingletons } from "../jest.common.js";
-import { Container } from "inversify";
 
 const [dumbEnvVarName1, envVarWithUndefinedValue] = [
   "dumbEnvVarName1",

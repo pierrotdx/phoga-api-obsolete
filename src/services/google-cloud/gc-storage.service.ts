@@ -6,7 +6,7 @@ import {
   UploadFileParams,
   UploadFileOptions,
 } from "../../models/cloud/cloud-bucket.model.js";
-import { TYPES } from "../../types.js";
+import { TYPES } from "../../inversify/index.js";
 
 @injectable()
 export class GCStorageService implements CloudStorageInterface {

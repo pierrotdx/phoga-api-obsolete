@@ -4,7 +4,7 @@ import { UploadFileParams } from "../../models/cloud/cloud-bucket.model.js";
 import { FileOptions } from "buffer";
 import { Writable } from "node:stream";
 import { commonDumbError, commonMockSingleton } from "../../jest.common.js";
-import { TYPES } from "../../types.js";
+import { TYPES } from "../../inversify/index.js";
 import { LoggerInterface } from "../../models/logger.model.js";
 
 const dumbStorage = new Storage();

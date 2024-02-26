@@ -3,17 +3,17 @@ import "dotenv/config";
 
 import { Container, ContainerModule } from "inversify";
 import { TYPES } from "./types.js";
-import { PhotoController } from "./controllers/index.js";
+import { PhotoController } from "../controllers/index.js";
 import {
   EnvService,
   GCStorageService,
   LoggerService,
-} from "./services/index.js";
+} from "../services/index.js";
 import {
   CloudStorageInterface,
   EnvInterface,
   LoggerInterface,
-} from "./models/index.js";
+} from "../models/index.js";
 
 export const constantsContainerModule = new ContainerModule((bind) => {
   bind<NodeJS.ProcessEnv>(TYPES.Env).toConstantValue(process.env);
