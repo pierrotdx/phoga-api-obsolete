@@ -5,9 +5,20 @@ export class GetPhotoValidator {
   @IsString()
   @IsDefined()
   @IsNotEmpty()
-  name: string;
+  id: string;
 
   constructor(req: Request) {
-    this.name = req.params?.name;
+    this.id = req.params?.id;
+  }
+}
+
+export class GetPhotoDataValidator {
+  @IsString()
+  @IsDefined()
+  @IsNotEmpty()
+  id: string;
+
+  constructor(req: Request) {
+    this.id = req?.params?.id;
   }
 }

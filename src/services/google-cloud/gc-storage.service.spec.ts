@@ -1,5 +1,5 @@
 import { Bucket, File, Storage } from "@google-cloud/storage";
-import { GCStorageService } from "./gc-storage.service.js";
+import { GcStorageService } from "./gc-storage.service.js";
 import { UploadFileParams } from "../../models/cloud/cloud-bucket.model.js";
 import { FileOptions } from "buffer";
 import { Writable } from "node:stream";
@@ -16,8 +16,8 @@ describe("gc-storage.service", () => {
   const loggerService = commonMockSingleton.get<LoggerInterface>(
     TYPES.LoggerService
   );
-  const gcStorageService = commonMockSingleton.get<GCStorageService>(
-    TYPES.GoogleStorageService
+  const gcStorageService = commonMockSingleton.get<GcStorageService>(
+    TYPES.GcStorageService
   );
 
   const errorLogSpy = jest.spyOn(loggerService, "error");

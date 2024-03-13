@@ -30,8 +30,10 @@ export class LoggerService implements LoggerInterface {
     this.logger.warn(message, meta);
   };
 
-  error = (err: Error) => {
-    this.logger.error(err.stack);
+  error = (err: any) => {
+    const error = new Error();
+    error.stack = err instanceof Error ? err.stack : err;
+    this.logger.error(error.stack);
   };
 
   private readonly onLocalFileTransportError = (err: Error) => {

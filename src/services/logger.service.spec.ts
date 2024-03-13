@@ -51,10 +51,26 @@ describe("loggerService", () => {
   });
 
   describe("error", () => {
+    let loggerErrorSpy: jest.SpyInstance;
+    beforeEach(() => {
+      loggerErrorSpy = jest.spyOn(loggerService["logger"], "error");
+    });
+
     it("should call the function `logger.error`", () => {
-      const loggerErrorSpy = jest.spyOn(loggerService["logger"], "error");
       loggerService.error(commonDumbError);
       expect(loggerErrorSpy).toHaveBeenCalled();
+      expect.assertions(1);
+    });
+
+    it('should log an error with the same stack as the input if the latter is an instance of "Error"', () => {
+      loggerService.error(commonDumbError);
+      expect(loggerErrorSpy).toHaveBeenCalledWith(commonDumbError.stack);
+      expect.assertions(1);
+    });
+
+    it('should log an error with the input if the latter is not an instance of "Error"', () => {
+      loggerService.error("dumb error of string type");
+      expect(loggerErrorSpy).toHaveBeenCalledWith("dumb error of string type");
       expect.assertions(1);
     });
   });

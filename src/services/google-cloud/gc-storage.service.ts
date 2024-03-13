@@ -9,7 +9,7 @@ import {
 import { TYPES } from "../../inversify/index.js";
 
 @injectable()
-export class GCStorageService implements CloudStorageInterface {
+export class GcStorageService implements CloudStorageInterface {
   client = new Storage();
 
   constructor(

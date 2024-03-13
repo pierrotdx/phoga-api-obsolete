@@ -6,11 +6,13 @@ import { TYPES } from "./types.js";
 import { PhotoController } from "../controllers/index.js";
 import {
   EnvService,
-  GCStorageService,
+  GcStorageService,
   LoggerService,
+  MongoDbService,
 } from "../services/index.js";
 import {
   CloudStorageInterface,
+  DbInterface,
   EnvInterface,
   LoggerInterface,
 } from "../models/index.js";
@@ -26,13 +28,14 @@ export const controllersContainerModule = new ContainerModule((bind) => {
 });
 
 export const servicesContainerModule = new ContainerModule((bind) => {
-  bind<CloudStorageInterface>(TYPES.GoogleStorageService)
-    .to(GCStorageService)
+  bind<CloudStorageInterface>(TYPES.GcStorageService)
+    .to(GcStorageService)
     .inSingletonScope();
   bind<EnvInterface>(TYPES.EnvService).to(EnvService).inSingletonScope();
   bind<LoggerInterface>(TYPES.LoggerService)
     .to(LoggerService)
     .inSingletonScope();
+  bind<DbInterface>(TYPES.MongoDbService).to(MongoDbService).inSingletonScope();
 });
 
 // https://github.com/inversify/InversifyJS/blob/master/wiki/recipes.md#overriding-bindings-on-unit-tests

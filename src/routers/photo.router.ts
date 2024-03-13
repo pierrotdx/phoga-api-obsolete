@@ -8,6 +8,11 @@ export const photoRouter = express.Router();
 
 const photoController = singletons.get<PhotoController>(TYPES.PhotoController);
 
-photoRouter.get("/:name", errorCatchingWrapper(photoController.getPhoto));
+photoRouter.get("/:id", errorCatchingWrapper(photoController.getPhoto));
+
+photoRouter.get(
+  "/:id/metadata",
+  errorCatchingWrapper(photoController.getPhotoMetadata)
+);
 
 photoRouter.put("/", errorCatchingWrapper(photoController.createPhoto));
