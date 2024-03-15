@@ -15,7 +15,7 @@ const bindMockEnv = (container: Container, env?: NodeJS.ProcessEnv) => {
 const mockLoggerService: LoggerInterface = {
   info: (message: string, meta?: LogData) => console.info(message, meta),
   warn: (message: string, meta?: LogData) => console.warn(message, meta),
-  error: (error: Error) => console.error(error),
+  error: (error: any) => console.error(error),
 };
 
 // hack: mocking logger using console so that jest's argument `--silent` works
@@ -37,6 +37,8 @@ export const getMockSingletons = (env?: NodeJS.ProcessEnv) => {
 const commonDumbEnv: NodeJS.ProcessEnv = {
   HTTP_SERVER_PORT: "dumb http port",
   PHOTOS_BUCKET: "dumb photo bucket",
+  MONGO_CONNECTION_STRING: "mongodb://dumb connection string",
+  MONGO_DATABASE_NAME: "dumb database name",
 };
 export const commonMockSingleton = getMockSingletons(commonDumbEnv);
 

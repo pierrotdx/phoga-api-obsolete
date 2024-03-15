@@ -16,7 +16,11 @@ const dumbEnv: NodeJS.ProcessEnv = {
 describe("envService", () => {
   const mockSingletons = getMockSingletons(dumbEnv);
   const loggerService = mockSingletons.get<LoggerService>(TYPES.LoggerService);
-  const envService = mockSingletons.get<EnvService>(TYPES.EnvService);
+  let envService: EnvService;
+
+  beforeEach(() => {
+    envService = new EnvService(dumbEnv, loggerService);
+  });
 
   describe("getEnvVariable", () => {
     it("should return the value corresponding to the env name variable if it exists", () => {
