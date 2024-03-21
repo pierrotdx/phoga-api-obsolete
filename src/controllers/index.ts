@@ -1,1 +1,1 @@
-export * from "./photo.controller.js";
+export * from "./photos.controller.js";

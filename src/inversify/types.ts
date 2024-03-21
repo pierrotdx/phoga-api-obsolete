@@ -3,7 +3,7 @@ const CONSTANT_TYPES = {
 };
 
 const CONTROLLER_TYPES = {
-  PhotoController: Symbol.for("PhotoController"),
+  PhotosController: Symbol.for("PhotosController"),
 };
 
 const SERVICE_TYPES = {

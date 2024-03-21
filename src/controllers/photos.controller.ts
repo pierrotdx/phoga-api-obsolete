@@ -10,15 +10,17 @@ import {
   PhotoMetadata,
 } from "../models/index.js";
 import {
-  GetPhotoDataValidator,
+  GetPhotoMetadataValidator,
   GetPhotoValidator,
+  GetPhotosValidator,
 } from "../validators/photo.validator.js";
 import { validateOrReject } from "class-validator";
 import { EnvService } from "../services/env.service.js";
 import { DbCollection } from "../models/db-collections.model.js";
+import { Filter } from "mongodb";
 
 @injectable()
-export class PhotoController {
+export class PhotosController {
   private readonly PHOTOS_BUCKET;
 
   constructor(
@@ -42,7 +44,7 @@ export class PhotoController {
   };
 
   readonly getPhotoMetadata = async (req: Request, res: Response) => {
-    const data = new GetPhotoDataValidator(req);
+    const data = new GetPhotoMetadataValidator(req);
     await validateOrReject(data);
     const result = await this.dbService.getDocumentById(
       DbCollection.PhotosMetadata,
@@ -78,5 +80,19 @@ export class PhotoController {
     );
 
     return destStream;
+  };
+
+  getPhotos = async (req: Request, res: Response) => {
+    console.log("req", req);
+    const { filter, render } = new GetPhotosValidator(req);
+    const mongoFilter = this.dbService.photoMetadataFilterAdaptor(
+      filter
+    ) as Filter<PhotoMetadata>;
+    const result = await this.dbService.search(
+      DbCollection.PhotosMetadata,
+      mongoFilter,
+      render
+    );
+    res.json(result);
   };
 }

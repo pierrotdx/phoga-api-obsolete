@@ -1,0 +1,16 @@
+meta {
+  name: search photos metadata
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/photos/metadata?size=10&filename=toto
+  body: none
+  auth: none
+}
+
+query {
+  size: 10
+  filename: toto
+}
