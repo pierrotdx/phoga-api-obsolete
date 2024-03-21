@@ -1,5 +1,5 @@
 import express, { NextFunction, Request, Response } from "express";
-import { photoRouter } from "./photo.router.js";
+import { photosRouter } from "./photo.router.js";
 import { LoggerInterface } from "../models/logger.model.js";
 import { TYPES, singletons } from "../inversify/index.js";
 import { errorCatchingWrapper } from "../middlewares/index.js";
@@ -20,4 +20,4 @@ appRouter.get(
   })
 );
 
-appRouter.use("/photo", photoRouter);
+appRouter.use("/photos", photosRouter);

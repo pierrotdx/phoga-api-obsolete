@@ -3,7 +3,7 @@ import "dotenv/config";
 
 import { Container, ContainerModule } from "inversify";
 import { TYPES } from "./types.js";
-import { PhotoController } from "../controllers/index.js";
+import { PhotosController } from "../controllers/index.js";
 import {
   EnvService,
   GcStorageService,
@@ -22,8 +22,8 @@ export const constantsContainerModule = new ContainerModule((bind) => {
 });
 
 export const controllersContainerModule = new ContainerModule((bind) => {
-  bind<PhotoController>(TYPES.PhotoController)
-    .to(PhotoController)
+  bind<PhotosController>(TYPES.PhotosController)
+    .to(PhotosController)
     .inSingletonScope();
 });
 

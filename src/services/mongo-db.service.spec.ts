@@ -4,9 +4,8 @@ import { MongoDbService } from "./mongo-db.service.js";
 import { LoggerService } from "./logger.service.js";
 import { ConnectionCreatedEvent } from "mongodb";
 import { EnvService } from "./env.service.js";
-import exp from "constants";
-import { logger } from "express-winston";
 import { DbCollection } from "../models/db-collections.model.js";
+import exp from "constants";
 
 describe("mongoDbService", () => {
   let mongoDbService: MongoDbService;
@@ -102,6 +101,84 @@ describe("mongoDbService", () => {
       expect(getCollectionSpy).toHaveBeenLastCalledWith(dumbCollectionName);
       expect(findOneSpy).toHaveBeenCalled();
       expect.assertions(2);
+    });
+  });
+
+  describe("search", () => {
+    const dumbCollectionName = "dumbCollectionName" as DbCollection;
+    const dumbFilter = { dumbFilter: "dumbFilter" } as any;
+    const dumbRender = { size: 50 };
+
+    let findSpy: jest.SpyInstance;
+    let getCollectionSpy: jest.SpyInstance;
+    beforeEach(() => {
+      findSpy = jest.fn().mockReturnValue({
+        toArray: () => "dumb result",
+      });
+      getCollectionSpy = jest.spyOn(mongoDbService as any, "getCollection");
+      getCollectionSpy.mockReturnValue({
+        find: findSpy,
+      });
+    });
+
+    it('should call the "getCollection" and "collection.find" functions', async () => {
+      await mongoDbService.search(dumbCollectionName, dumbFilter, dumbRender);
+      expect(getCollectionSpy).toHaveBeenLastCalledWith(dumbCollectionName);
+      expect(findSpy).toHaveBeenLastCalledWith(dumbFilter, dumbRender);
+      expect.assertions(2);
+    });
+
+    it("should be called with a default size if no size is specified in the render param", async () => {
+      await mongoDbService.search(dumbCollectionName, dumbFilter);
+      const defaultSize = 20;
+      expect(findSpy).toHaveBeenLastCalledWith(dumbFilter, {
+        size: defaultSize,
+      });
+      expect.assertions(1);
+    });
+  });
+
+  describe("photoMetadataFilterAdaptor", () => {
+    it("should throw an error if the provided filter is `undefined`", () => {
+      expect(mongoDbService.photoMetadataFilterAdaptor).toThrow();
+      expect.assertions(1);
+    });
+
+    it("should return an object with a `date` field if the input filter has a `minDate` field", () => {
+      const input = { minDate: new Date() };
+      const result = mongoDbService.photoMetadataFilterAdaptor(input);
+      expect(result.date).toBeDefined();
+      expect.assertions(1);
+    });
+
+    it("should return an object with a `date` field if the input filter has a `maxDate` field", () => {
+      const input = { maxDate: new Date() };
+      const result = mongoDbService.photoMetadataFilterAdaptor(input);
+      expect(result.date).toBeDefined();
+      expect.assertions(1);
+    });
+
+    it("should return an object with a `date` field if the input filter has both `minDate` and `maxDate` fields", () => {
+      const dumbDate = new Date();
+      const input = { minDate: dumbDate, maxDate: dumbDate };
+      const result = mongoDbService.photoMetadataFilterAdaptor(input);
+      expect(result.date).toBeDefined();
+      expect.assertions(1);
+    });
+
+    it("should return an object with a `titles` field if the input filter has a `title` field", () => {
+      const dumbTitle = "dumb title";
+      const input = { title: dumbTitle };
+      const result = mongoDbService.photoMetadataFilterAdaptor(input);
+      expect(result.titles).toBe(dumbTitle);
+      expect.assertions(1);
+    });
+
+    it("should return an object with a `filename` field if the input filter has a `filename` field", () => {
+      const input = { filename: "dumb filename" };
+      const result = mongoDbService.photoMetadataFilterAdaptor(input);
+      expect(result.filename).toBeDefined();
+      expect.assertions(1);
     });
   });
 });

@@ -1,16 +1,11 @@
 import { inject, injectable } from "inversify";
-import { DbInterface } from "../models/db.model.js";
-import {
-  Db,
-  Document,
-  MongoClient,
-  Filter,
-  ConnectionCreatedEvent,
-} from "mongodb";
+import { DbDoc, DbInterface } from "../models/db.model.js";
+import { Db, MongoClient, Filter, ConnectionCreatedEvent } from "mongodb";
 import { TYPES } from "../inversify/index.js";
 import { EnvService } from "./env.service.js";
 import { DbCollection } from "../models/db-collections.model.js";
 import { LoggerInterface, PhotoMetadata } from "../models/index.js";
+import { FilterParams, RenderParams } from "../models/search-params.model.js";
 
 @injectable()
 export class MongoDbService implements DbInterface {
@@ -59,14 +54,54 @@ export class MongoDbService implements DbInterface {
 
   private readonly getDbName = () => this.envService.MONGO_DATABASE_NAME;
 
-  private readonly getCollection = <DocType extends Document>(
+  private readonly getCollection = <DocType extends DbDoc>(
     collectionName: DbCollection
   ) => this.db.collection<DocType>(collectionName);
 
-  getDocumentById = async (collectionName: DbCollection, _id: string) => {
-    const collection = this.getCollection<PhotoMetadata>(collectionName);
-    const query: Filter<PhotoMetadata> = { _id };
+  getDocumentById = async <DocType extends DbDoc>(
+    collectionName: DbCollection,
+    _id: string
+  ) => {
+    const collection = this.getCollection<DocType>(collectionName);
+    const query: Filter<DbDoc> = { _id };
     const doc = await collection.findOne(query);
     return doc;
+  };
+
+  search = async <DocType extends DbDoc>(
+    collectionName: DbCollection,
+    filter: Filter<DocType>,
+    render: RenderParams = {}
+  ) => {
+    if (!render.size) {
+      render.size = 20;
+    }
+    const collection = this.getCollection<DocType>(collectionName);
+    const result = await collection.find(filter, render).toArray();
+    return result;
+  };
+
+  photoMetadataFilterAdaptor = (
+    filter: FilterParams
+  ): Filter<PhotoMetadata> => {
+    if (!filter) {
+      throw new Error("no filter params");
+    }
+    const mongoFilter: Filter<PhotoMetadata> = {};
+    if (filter.minDate) {
+      mongoFilter.date = { $gte: filter.minDate };
+    }
+    if (filter.maxDate) {
+      mongoFilter.date = mongoFilter.date
+        ? { $and: [mongoFilter.date, { $lte: filter.maxDate }] }
+        : { $lte: filter.maxDate };
+    }
+    if (filter.title) {
+      mongoFilter.titles = filter.title;
+    }
+    if (filter.filename) {
+      mongoFilter.filename = { $regex: filter.filename };
+    }
+    return mongoFilter;
   };
 }

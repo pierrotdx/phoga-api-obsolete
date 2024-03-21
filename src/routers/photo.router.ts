@@ -1,16 +1,20 @@
 import express from "express";
 
 import { TYPES, singletons } from "../inversify/index.js";
-import { PhotoController } from "../controllers/index.js";
+import { PhotosController } from "../controllers/index.js";
 import { errorCatchingWrapper } from "../middlewares/index.js";
 
-export const photoRouter = express.Router();
+export const photosRouter = express.Router();
 
-const photoController = singletons.get<PhotoController>(TYPES.PhotoController);
+const photosController = singletons.get<PhotosController>(
+  TYPES.PhotosController
+);
 
-photoRouter.get("/:id", errorCatchingWrapper(photoController.getPhoto));
+photosRouter.get("/metadata", errorCatchingWrapper(photosController.getPhotos));
 
-photoRouter.get(
+photosRouter.get("/:id", errorCatchingWrapper(photosController.getPhoto));
+
+photosRouter.get(
   "/:id/metadata",
-  errorCatchingWrapper(photoController.getPhotoMetadata)
+  errorCatchingWrapper(photosController.getPhotoMetadata)
 );
