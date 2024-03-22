@@ -83,7 +83,6 @@ export class PhotosController {
   };
 
   getPhotos = async (req: Request, res: Response) => {
-    console.log("req", req);
     const { filter, render } = new GetPhotosValidator(req);
     const mongoFilter = this.dbService.photoMetadataFilterAdaptor(
       filter
