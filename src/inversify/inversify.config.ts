@@ -16,6 +16,7 @@ import {
   EnvInterface,
   LoggerInterface,
 } from "../models/index.js";
+import { PhotosService } from "../services/photos.service.js";
 
 export const constantsContainerModule = new ContainerModule((bind) => {
   bind<NodeJS.ProcessEnv>(TYPES.Env).toConstantValue(process.env);
@@ -36,6 +37,7 @@ export const servicesContainerModule = new ContainerModule((bind) => {
     .to(LoggerService)
     .inSingletonScope();
   bind<DbInterface>(TYPES.MongoDbService).to(MongoDbService).inSingletonScope();
+  bind<PhotosService>(TYPES.PhotosService).to(PhotosService).inSingletonScope();
 });
 
 // https://github.com/inversify/InversifyJS/blob/master/wiki/recipes.md#overriding-bindings-on-unit-tests

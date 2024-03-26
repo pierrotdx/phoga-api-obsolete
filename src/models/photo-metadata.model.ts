@@ -16,3 +16,9 @@ export interface PhotoMetadataFilter extends FilterParams {
   maxDate?: Date;
   title?: string;
 }
+
+export interface PhotoFormatOptions {
+  width?: number;
+  height?: number;
+  quality?: number;
+}

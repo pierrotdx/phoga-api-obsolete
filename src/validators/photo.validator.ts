@@ -4,7 +4,10 @@ import {
   IsEnum,
   IsInt,
   IsNotEmpty,
+  IsOptional,
   IsString,
+  Max,
+  Min,
 } from "class-validator";
 import { Request } from "express";
 import { RenderParams, Sort } from "../models/search-params.model.js";
@@ -16,9 +19,31 @@ export class GetPhotoValidator {
   @IsNotEmpty()
   id: string;
 
+  @IsOptional()
+  @IsInt()
+  width?: number;
+
+  @IsOptional()
+  @IsInt()
+  height?: number;
+
+  @IsOptional()
+  @IsInt()
+  @Min(50)
+  @Max(100)
+  quality?: number;
+
   constructor(req: Request) {
     this.id = req.params?.id;
+
+    const query = req?.query as Record<string, string>;
+    this.width = this.parseQueryParamIntoInt(query.width);
+    this.height = this.parseQueryParamIntoInt(query.height);
+    this.quality = this.parseQueryParamIntoInt(query.quality);
   }
+
+  private parseQueryParamIntoInt = (param: string) =>
+    param ? parseInt(param) : undefined;
 }
 
 export class GetPhotoMetadataValidator {
