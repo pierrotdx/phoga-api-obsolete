@@ -11,6 +11,7 @@ const SERVICE_TYPES = {
   GcStorageService: Symbol.for("GcStorageService"),
   LoggerService: Symbol.for("LoggerService"),
   MongoDbService: Symbol.for("MongoDbService"),
+  PhotosService: Symbol.for("PhotosService"),
 };
 
 const TYPES = {

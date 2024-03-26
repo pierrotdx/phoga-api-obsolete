@@ -1,5 +1,5 @@
 import { TYPES } from "../inversify/index.js";
-import { commonMockSingleton } from "../jest.common.js";
+import { commonMockSingletons } from "../jest.common.js";
 import { MongoDbService } from "./mongo-db.service.js";
 import { LoggerService } from "./logger.service.js";
 import { ConnectionCreatedEvent } from "mongodb";
@@ -9,9 +9,9 @@ import exp from "constants";
 
 describe("mongoDbService", () => {
   let mongoDbService: MongoDbService;
-  const envService = commonMockSingleton.get<EnvService>(TYPES.EnvService);
+  const envService = commonMockSingletons.get<EnvService>(TYPES.EnvService);
 
-  const loggerService = commonMockSingleton.get<LoggerService>(
+  const loggerService = commonMockSingletons.get<LoggerService>(
     TYPES.LoggerService
   );
 

@@ -43,13 +43,16 @@ export class GcStorageService implements CloudStorageInterface {
     return buckets;
   };
 
-  streamReadFile = async (fileName: string, bucketName: string) => {
+  getFile = async (fileName: string, bucketName: string) => {
     const files = await this.getFilesFromBucket(fileName, bucketName);
     if (!files?.length) {
       throw new Error("no matching file");
     }
-    return files[0].createReadStream();
+    return files[0];
   };
+
+  fileReadStream = async (fileName: string, bucketName: string) =>
+    (await this.getFile(fileName, bucketName)).createReadStream();
 
   private getFilesFromBucket = async (prefix: string, bucketName: string) => {
     const bucket = this.getGcBucket(bucketName);

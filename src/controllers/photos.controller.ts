@@ -1,12 +1,12 @@
 import { inject, injectable } from "inversify";
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import formidable from "formidable";
 import VolatileFile from "formidable/VolatileFile.js";
 
 import { TYPES } from "../inversify/index.js";
 import {
-  CloudStorageInterface,
   DbInterface,
+  PhotoFormatOptions as PhotoFormatOptions,
   PhotoMetadata,
 } from "../models/index.js";
 import {
@@ -18,6 +18,8 @@ import { validateOrReject } from "class-validator";
 import { EnvService } from "../services/env.service.js";
 import { DbCollection } from "../models/db-collections.model.js";
 import { Filter } from "mongodb";
+import { GcStorageService, PhotosService } from "../services/index.js";
+import { pick } from "ramda";
 
 @injectable()
 export class PhotosController {
@@ -25,22 +27,39 @@ export class PhotosController {
 
   constructor(
     @inject(TYPES.GcStorageService)
-    private readonly cloudStorageService: CloudStorageInterface,
+    private readonly cloudStorageService: GcStorageService,
     @inject(TYPES.MongoDbService)
     private readonly dbService: DbInterface,
-    @inject(TYPES.EnvService) private readonly envService: EnvService
+    @inject(TYPES.PhotosService)
+    private readonly photosService: PhotosService
   ) {
-    this.PHOTOS_BUCKET = this.envService.PHOTOS_BUCKET;
+    this.PHOTOS_BUCKET = this.photosService.PHOTOS_BUCKET;
   }
 
-  readonly getPhoto = async (req: Request, res: Response) => {
+  readonly getPhoto = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
     const data = new GetPhotoValidator(req);
     await validateOrReject(data);
-    const photoReadable = await this.cloudStorageService.streamReadFile(
+    const photoBuffer = await this.photosService.getPhotoBuffer(
       data.id,
       this.PHOTOS_BUCKET
     );
-    res.json(photoReadable);
+    const photoFormatOptions: PhotoFormatOptions = pick(
+      ["width", "height", "quality"],
+      data
+    );
+    const photoFormatPipeline = this.photosService.getPhotoFormatPipeline({
+      photoBuffer,
+      photoFormatOptions,
+      errorHandler: (err: Error) => {
+        next(err);
+      },
+    });
+    res.contentType("image/jpeg");
+    photoFormatPipeline.pipe(res);
   };
 
   readonly getPhotoMetadata = async (req: Request, res: Response) => {

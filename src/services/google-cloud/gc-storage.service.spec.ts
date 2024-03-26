@@ -3,7 +3,7 @@ import { GcStorageService } from "./gc-storage.service.js";
 import { UploadFileParams } from "../../models/cloud/cloud-bucket.model.js";
 import { FileOptions } from "buffer";
 import { Writable } from "node:stream";
-import { commonDumbError, commonMockSingleton } from "../../jest.common.js";
+import { commonDumbError, commonMockSingletons } from "../../jest.common.js";
 import { TYPES } from "../../inversify/index.js";
 import { LoggerInterface } from "../../models/logger.model.js";
 
@@ -13,10 +13,10 @@ const dumbFileName = "fileName";
 const dumbFile: File = new File(dumbGcBucket, dumbFileName + ".jpg");
 
 describe("gc-storage.service", () => {
-  const loggerService = commonMockSingleton.get<LoggerInterface>(
+  const loggerService = commonMockSingletons.get<LoggerInterface>(
     TYPES.LoggerService
   );
-  const gcStorageService = commonMockSingleton.get<GcStorageService>(
+  const gcStorageService = commonMockSingletons.get<GcStorageService>(
     TYPES.GcStorageService
   );
 
@@ -95,11 +95,11 @@ describe("gc-storage.service", () => {
     });
   });
 
-  describe("streamReadFile", () => {
+  describe("fileReadStream", () => {
     it("should call the function `getFilesFromBucket`", async () => {
       getGcBucketSpy.mockReturnValueOnce(dumbGcBucket);
       try {
-        await gcStorageService.streamReadFile(
+        await gcStorageService.fileReadStream(
           "dumbFileName",
           dumbGcBucket.name
         );
@@ -111,7 +111,7 @@ describe("gc-storage.service", () => {
     it("should find the file with a matching name and return its read stream", async () => {
       getFilesFromBucket.mockResolvedValueOnce([dumbFile]);
       const createReadStreamSpy = jest.spyOn(dumbFile, "createReadStream");
-      await gcStorageService.streamReadFile(dumbFile.name, dumbGcBucket.name);
+      await gcStorageService.fileReadStream(dumbFile.name, dumbGcBucket.name);
       expect(createReadStreamSpy).toHaveBeenCalled();
       expect(getFilesFromBucket).toHaveBeenCalled();
       expect.assertions(2);
@@ -120,7 +120,7 @@ describe("gc-storage.service", () => {
     it("should reject if no file is matching the requested file name", async () => {
       getFilesFromBucket.mockResolvedValueOnce([]);
       expect(async () => {
-        await gcStorageService.streamReadFile(
+        await gcStorageService.fileReadStream(
           "non-matching file name",
           dumbGcBucket.name
         );

@@ -40,6 +40,6 @@ const commonDumbEnv: NodeJS.ProcessEnv = {
   MONGO_CONNECTION_STRING: "mongodb://dumb connection string",
   MONGO_DATABASE_NAME: "dumb database name",
 };
-export const commonMockSingleton = getMockSingletons(commonDumbEnv);
+export const commonMockSingletons = getMockSingletons(commonDumbEnv);
 
 export const commonDumbError = new Error("dumb error");
