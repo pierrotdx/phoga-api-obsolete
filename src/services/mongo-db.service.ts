@@ -104,4 +104,21 @@ export class MongoDbService implements DbInterface {
     }
     return mongoFilter;
   };
+
+  insert = async <DocType extends DbDoc>(
+    collectionName: DbCollection,
+    doc: DocType & DbDoc
+  ) => {
+    if (!doc._id) {
+      throw new Error('document must have an "_id" field');
+    }
+    const now = new Date();
+    doc.manifest = {
+      creation: { when: now },
+      last_update: { when: now },
+    };
+    const collection = this.getCollection<DbDoc>(collectionName);
+    await collection.insertOne(doc, { forceServerObjectId: false });
+    return doc._id;
+  };
 }

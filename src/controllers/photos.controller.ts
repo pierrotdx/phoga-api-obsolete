@@ -1,6 +1,6 @@
 import { inject, injectable } from "inversify";
 import { NextFunction, Request, Response } from "express";
-import formidable from "formidable";
+import formidable, { Part } from "formidable";
 import VolatileFile from "formidable/VolatileFile.js";
 
 import { TYPES } from "../inversify/index.js";
@@ -17,9 +17,10 @@ import {
 import { validateOrReject } from "class-validator";
 import { EnvService } from "../services/env.service.js";
 import { DbCollection } from "../models/db-collections.model.js";
-import { Filter } from "mongodb";
+import { Filter, ObjectId } from "mongodb";
 import { GcStorageService, PhotosService } from "../services/index.js";
 import { pick } from "ramda";
+import Formidable from "formidable/Formidable.js";
 
 @injectable()
 export class PhotosController {
@@ -72,11 +73,40 @@ export class PhotosController {
     res.json(result);
   };
 
+  private readonly getNewFileName =
+    (photoId: string) =>
+    (name: string, ext: string, part: Part, form: Formidable) =>
+      `${photoId}${ext}`;
+
   readonly createPhoto = async (req: Request, res: Response) => {
+    const photoId = new ObjectId().toHexString();
+    const maxSizeInMB = 2;
     const form = formidable({
       fileWriteStreamHandler: this.createPhotoWriteStreamHandler,
+      filename: this.getNewFileName(photoId),
+      keepExtensions: true,
+      maxFileSize: maxSizeInMB * 1024 * 1024,
     });
-    await form.parse(req);
+    const [fields, files] = await form.parse(req);
+    const file = files.file?.[0];
+    console.log("file", file);
+    if (!file) {
+      res.json(false);
+      return;
+    }
+    const now = new Date();
+    const photoMetadata: PhotoMetadata = {
+      _id: photoId,
+      filename: file.newFilename,
+      manifest: { creation: { when: now } },
+    };
+    if (fields.description) {
+      photoMetadata.description = fields.description[0];
+    }
+    if (fields.titles?.length) {
+      photoMetadata.titles = fields.titles;
+    }
+    await this.photosService.insertPhotoMetadataInDb(photoMetadata);
     res.json(true);
   };
 
@@ -85,7 +115,7 @@ export class PhotosController {
       throw new Error("no file to upload");
     }
 
-    const fileName = file.toJSON().originalFilename || "";
+    const fileName = file.toJSON().newFilename || "";
     if (!fileName) {
       throw new Error("no file name");
     }

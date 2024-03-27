@@ -2,12 +2,14 @@ import { inject, injectable } from "inversify";
 import sharp from "sharp";
 import {
   CloudStorageInterface,
-  EnvInterface,
+  DbInterface,
   PhotoFormatOptions,
+  PhotoMetadata,
 } from "../models/index.js";
 import { TYPES } from "../inversify/index.js";
 import { Readable } from "stream";
 import { EnvService } from "./env.service.js";
+import { DbCollection } from "../models/db-collections.model.js";
 
 @injectable()
 export class PhotosService {
@@ -15,6 +17,7 @@ export class PhotosService {
 
   constructor(
     @inject(TYPES.EnvService) private readonly envService: EnvService,
+    @inject(TYPES.MongoDbService) private readonly dbService: DbInterface,
     @inject(TYPES.GcStorageService)
     private readonly cloudStorageService: CloudStorageInterface
   ) {
@@ -66,10 +69,17 @@ export class PhotosService {
       ...photoFormatOptions,
     };
     const pipeline = sharp(photoBuffer).on("error", errorHandler);
-    pipeline.webp({ quality });
+    if (quality) {
+      pipeline.jpeg({ quality });
+    }
     if (width && height) {
       pipeline.resize(width, height);
     }
     return pipeline;
   };
+
+  insertPhotoMetadataInDb = (
+    photoMetadata: PhotoMetadata
+  ): Promise<PhotoMetadata["_id"]> =>
+    this.dbService.insert(DbCollection.PhotosMetadata, photoMetadata);
 }
