@@ -1,0 +1,15 @@
+meta {
+  name: create photo
+  type: http
+  seq: 4
+}
+
+put {
+  url: {{baseUrl}}/photos
+  body: multipartForm
+  auth: none
+}
+
+body:multipart-form {
+  : @file(C:\Users\pierr\Pictures\Saved Pictures\0vor2zjxuq361.jpg)
+}

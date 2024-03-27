@@ -18,3 +18,5 @@ photosRouter.get(
   "/:id/metadata",
   errorCatchingWrapper(photosController.getPhotoMetadata)
 );
+
+photosRouter.put("/", errorCatchingWrapper(photosController.createPhoto));

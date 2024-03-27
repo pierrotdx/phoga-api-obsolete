@@ -1,7 +1,7 @@
 import { commonMockSingletons } from "../jest.common.js";
 import { PhotosService } from "./photos.service.js";
 import { TYPES } from "../inversify/index.js";
-import { CloudStorageInterface } from "../models/index.js";
+import { CloudStorageInterface, DbInterface } from "../models/index.js";
 import { Readable } from "stream";
 import { EnvService } from "./env.service.js";
 
@@ -15,8 +15,13 @@ describe("photosService", () => {
   const cloudStorageService = commonMockSingletons.get<CloudStorageInterface>(
     TYPES.GcStorageService
   );
+  const dbService = commonMockSingletons.get<DbInterface>(TYPES.MongoDbService);
   beforeEach(() => {
-    photosService = new PhotosService(envService, cloudStorageService);
+    photosService = new PhotosService(
+      envService,
+      dbService,
+      cloudStorageService
+    );
   });
 
   describe("getPhotoBuffer", () => {
