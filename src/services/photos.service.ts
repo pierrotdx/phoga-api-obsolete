@@ -69,7 +69,9 @@ export class PhotosService {
       ...photoFormatOptions,
     };
     const pipeline = sharp(photoBuffer).on("error", errorHandler);
-    pipeline.webp({ quality });
+    if (quality) {
+      pipeline.jpeg({ quality });
+    }
     if (width && height) {
       pipeline.resize(width, height);
     }
