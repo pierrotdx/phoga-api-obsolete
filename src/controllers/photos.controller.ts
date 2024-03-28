@@ -89,16 +89,13 @@ export class PhotosController {
     });
     const [fields, files] = await form.parse(req);
     const file = files.file?.[0];
-    console.log("file", file);
     if (!file) {
       res.json(false);
       return;
     }
-    const now = new Date();
     const photoMetadata: PhotoMetadata = {
       _id: photoId,
       filename: file.newFilename,
-      manifest: { creation: { when: now } },
     };
     if (fields.description) {
       photoMetadata.description = fields.description[0];
