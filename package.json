@@ -1,7 +1,6 @@
 {
-  "name": "photo-gallery-public-api",
+  "name": "phoga-public-api",
   "version": "1.0.0",
-  "description": "",
   "main": "src/app.ts",
   "type": "module",
   "license": "ISC",

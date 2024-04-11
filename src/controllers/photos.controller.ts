@@ -78,33 +78,46 @@ export class PhotosController {
     (name: string, ext: string, part: Part, form: Formidable) =>
       `${photoId}${ext}`;
 
+  private readonly filterFile = (part: formidable.Part) => {
+    const fileField = "file";
+    return part.name === fileField;
+  };
+
   readonly createPhoto = async (req: Request, res: Response) => {
     const photoId = new ObjectId().toHexString();
     const maxSizeInMB = 2;
     const form = formidable({
       fileWriteStreamHandler: this.createPhotoWriteStreamHandler,
       filename: this.getNewFileName(photoId),
+      filter: this.filterFile,
       keepExtensions: true,
       maxFileSize: maxSizeInMB * 1024 * 1024,
     });
     const [fields, files] = await form.parse(req);
     const file = files.file?.[0];
-    console.log("file", file);
     if (!file) {
-      res.json(false);
-      return;
+      throw new Error('no file provided in the "file" field');
     }
-    const now = new Date();
     const photoMetadata: PhotoMetadata = {
       _id: photoId,
       filename: file.newFilename,
-      manifest: { creation: { when: now } },
     };
     if (fields.description) {
       photoMetadata.description = fields.description[0];
     }
-    if (fields.titles?.length) {
-      photoMetadata.titles = fields.titles;
+    if (fields.titles) {
+      photoMetadata.titles = fields.titles[0].split(",");
+    }
+    if (fields.latitude?.[0] && fields.longitude?.[0]) {
+      const geoLocation: PhotoMetadata["geoLocation"] = {
+        latitude: Number.parseFloat(fields.latitude[0]),
+        longitude: parseFloat(fields.longitude[0]),
+      };
+      photoMetadata.geoLocation = geoLocation;
+    }
+    if (fields.date?.[0]) {
+      const date = new Date(fields.date?.[0]);
+      photoMetadata.date = date;
     }
     await this.photosService.insertPhotoMetadataInDb(photoMetadata);
     res.json(true);

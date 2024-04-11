@@ -1,4 +1,4 @@
-# photo-gallery-public-api
+# phoga-public-api
 
 ## Environment configuration
 
