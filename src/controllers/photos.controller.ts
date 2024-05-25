@@ -1,38 +1,35 @@
 import { inject, injectable } from "inversify";
 import { NextFunction, Request, Response } from "express";
-import formidable, { Part } from "formidable";
-import VolatileFile from "formidable/VolatileFile.js";
 
 import { TYPES } from "../inversify/index.js";
 import {
   DbInterface,
-  PhotoFormatOptions as PhotoFormatOptions,
+  PhotoFormatOptions,
   PhotoMetadata,
 } from "../models/index.js";
 import {
   GetPhotoMetadataValidator,
   GetPhotoValidator,
   GetPhotosValidator,
+  PatchPhotoValidator,
 } from "../validators/photo.validator.js";
 import { validateOrReject } from "class-validator";
-import { EnvService } from "../services/env.service.js";
 import { DbCollection } from "../models/db-collections.model.js";
 import { Filter, ObjectId } from "mongodb";
-import { GcStorageService, PhotosService } from "../services/index.js";
+import { PhotosService, EditPhotoService } from "../services/index.js";
 import { pick } from "ramda";
-import Formidable from "formidable/Formidable.js";
 
 @injectable()
 export class PhotosController {
-  private readonly PHOTOS_BUCKET;
+  private readonly PHOTOS_BUCKET: string;
 
   constructor(
-    @inject(TYPES.GcStorageService)
-    private readonly cloudStorageService: GcStorageService,
     @inject(TYPES.MongoDbService)
     private readonly dbService: DbInterface,
     @inject(TYPES.PhotosService)
-    private readonly photosService: PhotosService
+    private readonly photosService: PhotosService,
+    @inject(TYPES.UpdatePhotoService)
+    private readonly editPhotoService: EditPhotoService
   ) {
     this.PHOTOS_BUCKET = this.photosService.PHOTOS_BUCKET;
   }
@@ -73,80 +70,43 @@ export class PhotosController {
     res.json(result);
   };
 
-  private readonly getNewFileName =
-    (photoId: string) =>
-    (name: string, ext: string, part: Part, form: Formidable) =>
-      `${photoId}${ext}`;
-
-  private readonly filterFile = (part: formidable.Part) => {
-    const fileField = "file";
-    return part.name === fileField;
-  };
-
   readonly createPhoto = async (req: Request, res: Response) => {
     const photoId = new ObjectId().toHexString();
     const maxSizeInMB = 2;
-    const form = formidable({
-      fileWriteStreamHandler: this.createPhotoWriteStreamHandler,
-      filename: this.getNewFileName(photoId),
-      filter: this.filterFile,
-      keepExtensions: true,
-      maxFileSize: maxSizeInMB * 1024 * 1024,
-    });
-    const [fields, files] = await form.parse(req);
-    const file = files.file?.[0];
-    if (!file) {
-      throw new Error('no file provided in the "file" field');
-    }
-    const photoMetadata: PhotoMetadata = {
-      _id: photoId,
-      filename: file.newFilename,
-    };
-    if (fields.description) {
-      photoMetadata.description = fields.description[0];
-    }
-    if (fields.titles) {
-      photoMetadata.titles = fields.titles[0].split(",");
-    }
-    if (fields.latitude?.[0] && fields.longitude?.[0]) {
-      const geoLocation: PhotoMetadata["geoLocation"] = {
-        latitude: Number.parseFloat(fields.latitude[0]),
-        longitude: parseFloat(fields.longitude[0]),
-      };
-      photoMetadata.geoLocation = geoLocation;
-    }
-    if (fields.date?.[0]) {
-      const date = new Date(fields.date?.[0]);
-      photoMetadata.date = date;
-    }
+    const form = this.editPhotoService.initForm(photoId, maxSizeInMB);
+    const photoMetadata = await this.editPhotoService.getPhotoMetadataFromForm(
+      req,
+      photoId,
+      form
+    );
     await this.photosService.insertPhotoMetadataInDb(photoMetadata);
     res.json(true);
   };
 
-  private readonly createPhotoWriteStreamHandler = (file?: VolatileFile) => {
-    if (!file) {
-      throw new Error("no file to upload");
-    }
-
-    const fileName = file.toJSON().newFilename || "";
-    if (!fileName) {
-      throw new Error("no file name");
-    }
-
-    const destStream = this.cloudStorageService.streamUploadFile(
-      {
-        bucketName: this.PHOTOS_BUCKET,
-        fileName,
-      },
-      { isPublic: true }
+  patchPhoto = async (req: Request, res: Response) => {
+    const data = new PatchPhotoValidator(req);
+    await validateOrReject(data);
+    const photoId = data.id;
+    const maxSizeInMB = 2;
+    const form = this.editPhotoService.initForm(photoId, maxSizeInMB);
+    const photoMetadataPatch =
+      await this.editPhotoService.getPhotoMetadataFromForm(req, photoId, form);
+    const patchQuery =
+      this.editPhotoService.photoMetadataPatchAdaptor(photoMetadataPatch);
+    const filterQuery = this.editPhotoService.photoMetadataFilterAdaptor({
+      _id: photoId,
+    });
+    await this.dbService.patch(
+      DbCollection.PhotosMetadata,
+      filterQuery,
+      patchQuery
     );
-
-    return destStream;
+    res.json(true);
   };
 
   getPhotos = async (req: Request, res: Response) => {
     const { filter, render } = new GetPhotosValidator(req);
-    const mongoFilter = this.dbService.photoMetadataFilterAdaptor(
+    const mongoFilter = this.editPhotoService.photoMetadataFilterAdaptor(
       filter
     ) as Filter<PhotoMetadata>;
     const result = await this.dbService.search(

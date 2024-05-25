@@ -20,3 +20,5 @@ photosRouter.get(
 );
 
 photosRouter.put("/", errorCatchingWrapper(photosController.createPhoto));
+
+photosRouter.patch("/:id", errorCatchingWrapper(photosController.patchPhoto));

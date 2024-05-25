@@ -1,5 +1,5 @@
 import { DbCollection } from "./db-collections.model.js";
-import { PhotoMetadataFilter } from "./photo-metadata.model.js";
+import { PhotoMetadata, PhotoMetadataFilter } from "./photo-metadata.model.js";
 import { FilterParams, RenderParams } from "./search-params.model.js";
 
 export interface DbInterface {
@@ -12,11 +12,15 @@ export interface DbInterface {
     filter: FilterParams,
     render?: RenderParams
   ) => Promise<unknown>;
-  photoMetadataFilterAdaptor: (filter: PhotoMetadataFilter) => unknown;
   insert: <DocType extends DbDoc>(
     collectionName: DbCollection,
     doc: DocType
   ) => Promise<DbDoc["_id"]>;
+  patch: (
+    collectionName: DbCollection,
+    filterQuery: FilterQuery,
+    patchQuery: PatchQuery
+  ) => Promise<boolean>;
 }
 
 export interface DbDoc {
@@ -31,3 +35,6 @@ export interface DbDoc {
   };
   [key: string]: any;
 }
+
+export type FilterQuery = Record<string, any>;
+export type PatchQuery = Record<string, any>;

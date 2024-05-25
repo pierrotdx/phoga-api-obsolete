@@ -1,11 +1,16 @@
 import { inject, injectable } from "inversify";
-import { DbDoc, DbInterface } from "../models/db.model.js";
+import {
+  DbDoc,
+  DbInterface,
+  FilterQuery,
+  PatchQuery,
+} from "../models/db.model.js";
 import { Db, MongoClient, Filter, ConnectionCreatedEvent } from "mongodb";
 import { TYPES } from "../inversify/index.js";
 import { EnvService } from "./env.service.js";
 import { DbCollection } from "../models/db-collections.model.js";
-import { LoggerInterface, PhotoMetadata } from "../models/index.js";
-import { FilterParams, RenderParams } from "../models/search-params.model.js";
+import { LoggerInterface } from "../models/index.js";
+import { RenderParams } from "../models/search-params.model.js";
 
 @injectable()
 export class MongoDbService implements DbInterface {
@@ -81,30 +86,6 @@ export class MongoDbService implements DbInterface {
     return result;
   };
 
-  photoMetadataFilterAdaptor = (
-    filter: FilterParams
-  ): Filter<PhotoMetadata> => {
-    if (!filter) {
-      throw new Error("no filter params");
-    }
-    const mongoFilter: Filter<PhotoMetadata> = {};
-    if (filter.minDate) {
-      mongoFilter.date = { $gte: filter.minDate };
-    }
-    if (filter.maxDate) {
-      mongoFilter.date = mongoFilter.date
-        ? { $and: [mongoFilter.date, { $lte: filter.maxDate }] }
-        : { $lte: filter.maxDate };
-    }
-    if (filter.title) {
-      mongoFilter.titles = filter.title;
-    }
-    if (filter.filename) {
-      mongoFilter.filename = { $regex: filter.filename };
-    }
-    return mongoFilter;
-  };
-
   insert = async <DocType extends DbDoc>(
     collectionName: DbCollection,
     doc: DocType & DbDoc
@@ -120,5 +101,15 @@ export class MongoDbService implements DbInterface {
     const collection = this.getCollection<DbDoc>(collectionName);
     await collection.insertOne(doc, { forceServerObjectId: false });
     return doc._id;
+  };
+
+  patch = async <DocType extends DbDoc>(
+    collectionName: DbCollection,
+    filterQuery: FilterQuery,
+    patchQuery: PatchQuery
+  ) => {
+    const collection = this.getCollection<DocType>(collectionName);
+    await collection.updateOne(filterQuery, patchQuery, { upsert: false });
+    return true;
   };
 }

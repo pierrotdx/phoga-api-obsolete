@@ -9,6 +9,7 @@ import {
   GcStorageService,
   LoggerService,
   MongoDbService,
+  EditPhotoService,
 } from "../services/index.js";
 import {
   CloudStorageInterface,
@@ -38,6 +39,9 @@ export const servicesContainerModule = new ContainerModule((bind) => {
     .inSingletonScope();
   bind<DbInterface>(TYPES.MongoDbService).to(MongoDbService).inSingletonScope();
   bind<PhotosService>(TYPES.PhotosService).to(PhotosService).inSingletonScope();
+  bind<EditPhotoService>(TYPES.UpdatePhotoService)
+    .to(EditPhotoService)
+    .inSingletonScope();
 });
 
 // https://github.com/inversify/InversifyJS/blob/master/wiki/recipes.md#overriding-bindings-on-unit-tests

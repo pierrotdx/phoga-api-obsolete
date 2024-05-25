@@ -12,6 +12,7 @@ const SERVICE_TYPES = {
   LoggerService: Symbol.for("LoggerService"),
   MongoDbService: Symbol.for("MongoDbService"),
   PhotosService: Symbol.for("PhotosService"),
+  UpdatePhotoService: Symbol.for("UpdatePhotoService"),
 };
 
 const TYPES = {

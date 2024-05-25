@@ -2,7 +2,7 @@ import { DbDoc } from "./db.model.js";
 import { FilterParams } from "./search-params.model.js";
 
 export interface PhotoMetadata extends DbDoc {
-  filename: string;
+  filename?: string;
   date?: Date;
   description?: string;
   geoLocation?: Pick<GeolocationCoordinates, "latitude" | "longitude">;
@@ -10,6 +10,7 @@ export interface PhotoMetadata extends DbDoc {
 }
 
 export interface PhotoMetadataFilter extends FilterParams {
+  _id?: string;
   filename?: string;
   description?: string;
   minDate?: Date;
