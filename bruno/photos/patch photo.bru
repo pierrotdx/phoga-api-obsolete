@@ -1,0 +1,15 @@
+meta {
+  name: patch photo
+  type: http
+  seq: 6
+}
+
+patch {
+  url: {{baseUrl}}/photos/6651b06f9672b5ef791b80ad
+  body: multipartForm
+  auth: none
+}
+
+body:multipart-form {
+  description: c'est une nouvelle description
+}
