@@ -19,3 +19,8 @@ export interface UploadFileParams {
 export interface UploadFileOptions {
   isPublic?: boolean;
 }
+
+export interface DeleteFileParams {
+  bucketName: string;
+  fileName: string;
+}

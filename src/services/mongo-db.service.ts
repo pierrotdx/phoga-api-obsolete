@@ -112,4 +112,13 @@ export class MongoDbService implements DbInterface {
     await collection.updateOne(filterQuery, patchQuery, { upsert: false });
     return true;
   };
+
+  delete = async <DocType extends DbDoc>(
+    collectionName: DbCollection,
+    filterQuery: FilterQuery
+  ) => {
+    const collection = this.getCollection<DocType>(collectionName);
+    await collection.deleteOne(filterQuery);
+    return true;
+  };
 }

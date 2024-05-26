@@ -1,5 +1,4 @@
 import { DbCollection } from "./db-collections.model.js";
-import { PhotoMetadata, PhotoMetadataFilter } from "./photo-metadata.model.js";
 import { FilterParams, RenderParams } from "./search-params.model.js";
 
 export interface DbInterface {
@@ -20,6 +19,10 @@ export interface DbInterface {
     collectionName: DbCollection,
     filterQuery: FilterQuery,
     patchQuery: PatchQuery
+  ) => Promise<boolean>;
+  delete: (
+    collectionName: DbCollection,
+    filterQuery: FilterQuery
   ) => Promise<boolean>;
 }
 

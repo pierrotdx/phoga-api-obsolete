@@ -4,6 +4,7 @@ import {
   CloudFile,
   UploadFileParams,
   UploadFileOptions,
+  DeleteFileParams,
 } from "./cloud-bucket.model.js";
 
 export interface CloudStorageInterface {
@@ -18,4 +19,5 @@ export interface CloudStorageInterface {
     params: UploadFileParams,
     options?: UploadFileOptions
   ) => Writable;
+  deleteFile: (params: DeleteFileParams) => Promise<boolean>;
 }

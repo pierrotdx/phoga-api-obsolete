@@ -116,4 +116,12 @@ export class PhotosController {
     );
     res.json(result);
   };
+
+  deletePhoto = async (req: Request, res: Response) => {
+    const data = new PatchPhotoValidator(req);
+    await validateOrReject(data);
+    const photoId = data.id;
+    const isSuccess = await this.editPhotoService.deletePhoto(photoId);
+    res.json(isSuccess);
+  };
 }

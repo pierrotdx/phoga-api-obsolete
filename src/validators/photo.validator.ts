@@ -68,6 +68,17 @@ export class PatchPhotoValidator {
   }
 }
 
+export class DeletePhotoValidator {
+  @IsString()
+  @IsDefined()
+  @IsNotEmpty()
+  id: string;
+
+  constructor(req: Request) {
+    this.id = req?.params?.id;
+  }
+}
+
 export class GetPhotosValidator {
   @IsString()
   title?: string;

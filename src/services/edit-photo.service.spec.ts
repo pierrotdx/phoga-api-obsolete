@@ -1,5 +1,6 @@
 import { TYPES } from "../inversify/index.js";
 import { commonMockSingletons } from "../jest.common.js";
+import { DbInterface } from "../models/db.model.js";
 
 import { EditPhotoService, GcStorageService, PhotosService } from "./index.js";
 
@@ -11,9 +12,13 @@ describe("editPhotoService", () => {
   const cloudStorageService = commonMockSingletons.get<GcStorageService>(
     TYPES.GcStorageService
   );
-
+  const dbService = commonMockSingletons.get<DbInterface>(TYPES.MongoDbService);
   beforeEach(() => {
-    editPhotoService = new EditPhotoService(cloudStorageService, photosService);
+    editPhotoService = new EditPhotoService(
+      cloudStorageService,
+      photosService,
+      dbService
+    );
   });
 
   describe("photoMetadataFilterAdaptor", () => {

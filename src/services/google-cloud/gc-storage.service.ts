@@ -5,6 +5,7 @@ import {
   CloudBucket,
   UploadFileParams,
   UploadFileOptions,
+  DeleteFileParams,
 } from "../../models/cloud/cloud-bucket.model.js";
 import { TYPES } from "../../inversify/index.js";
 
@@ -84,4 +85,13 @@ export class GcStorageService implements CloudStorageInterface {
       this.loggerService.error(err);
       throw err;
     };
+
+  public readonly deleteFile = async (
+    params: DeleteFileParams
+  ): Promise<boolean> => {
+    const { bucketName, fileName } = params;
+    const file = await this.getFile(fileName, bucketName);
+    await file.delete();
+    return true;
+  };
 }

@@ -2,22 +2,29 @@ import formidable, { Part } from "formidable";
 import { inject, injectable } from "inversify";
 import { GcStorageService } from "./google-cloud/index.js";
 import { TYPES } from "../inversify/types.js";
-import { PhotoMetadata, PhotoMetadataFilter } from "../models/index.js";
+import {
+  DbInterface,
+  PhotoMetadata,
+  PhotoMetadataFilter,
+} from "../models/index.js";
 import { Request } from "express";
 import Formidable from "formidable/Formidable.js";
 import VolatileFile from "formidable/VolatileFile.js";
 import { PhotosService } from "./index.js";
 import IncomingForm from "formidable/Formidable.js";
 import { Filter, UpdateFilter } from "mongodb";
+import { DbCollection } from "../models/db-collections.model.js";
 
 @injectable()
 export class EditPhotoService {
   private readonly PHOTOS_BUCKET: string;
+
   constructor(
     @inject(TYPES.GcStorageService)
     private readonly cloudStorageService: GcStorageService,
     @inject(TYPES.PhotosService)
-    private readonly photosService: PhotosService
+    private readonly photosService: PhotosService,
+    @inject(TYPES.MongoDbService) private readonly dbService: DbInterface
   ) {
     this.PHOTOS_BUCKET = this.photosService.PHOTOS_BUCKET;
   }
@@ -132,5 +139,26 @@ export class EditPhotoService {
     }
     patchQuery.$set = fieldsToSet;
     return patchQuery;
+  };
+
+  deletePhoto = async (photoId: PhotoMetadata["_id"]): Promise<boolean> => {
+    const collectionName = DbCollection.PhotosMetadata;
+    const photoMetadata = (await this.dbService.getDocumentById(
+      collectionName,
+      photoId
+    )) as PhotoMetadata;
+    const fileName = photoMetadata.filename;
+    if (!fileName) {
+      throw new Error("the document to delete has no file name");
+    }
+    await this.cloudStorageService.deleteFile({
+      bucketName: this.PHOTOS_BUCKET,
+      fileName,
+    });
+    const mongoFilter = this.photoMetadataFilterAdaptor({
+      _id: photoId,
+    }) as Filter<PhotoMetadata>;
+    await this.dbService.delete(collectionName, mongoFilter);
+    return true;
   };
 }
