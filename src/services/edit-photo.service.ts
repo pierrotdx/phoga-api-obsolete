@@ -143,14 +143,7 @@ export class EditPhotoService {
 
   deletePhoto = async (photoId: PhotoMetadata["_id"]): Promise<boolean> => {
     const collectionName = DbCollection.PhotosMetadata;
-    const photoMetadata = (await this.dbService.getDocumentById(
-      collectionName,
-      photoId
-    )) as PhotoMetadata;
-    const fileName = photoMetadata.filename;
-    if (!fileName) {
-      throw new Error("the document to delete has no file name");
-    }
+    const fileName = photoId;
     await this.cloudStorageService.deleteFile({
       bucketName: this.PHOTOS_BUCKET,
       fileName,
