@@ -10,6 +10,7 @@ import {
   LoggerService,
   MongoDbService,
   EditPhotoService,
+  AuthService,
 } from "../services/index.js";
 import {
   CloudStorageInterface,
@@ -18,9 +19,16 @@ import {
   LoggerInterface,
 } from "../models/index.js";
 import { PhotosService } from "../services/photos.service.js";
+import { AdminPhotosController } from "../controllers/admin/index.js";
 
 export const constantsContainerModule = new ContainerModule((bind) => {
   bind<NodeJS.ProcessEnv>(TYPES.Env).toConstantValue(process.env);
+});
+
+export const adminControllersContainerModule = new ContainerModule((bind) => {
+  bind<AdminPhotosController>(TYPES.AdminPhotosController)
+    .to(AdminPhotosController)
+    .inSingletonScope();
 });
 
 export const controllersContainerModule = new ContainerModule((bind) => {
@@ -30,6 +38,7 @@ export const controllersContainerModule = new ContainerModule((bind) => {
 });
 
 export const servicesContainerModule = new ContainerModule((bind) => {
+  bind<AuthService>(TYPES.AuthService).to(AuthService).inSingletonScope();
   bind<CloudStorageInterface>(TYPES.GcStorageService)
     .to(GcStorageService)
     .inSingletonScope();
@@ -39,7 +48,7 @@ export const servicesContainerModule = new ContainerModule((bind) => {
     .inSingletonScope();
   bind<DbInterface>(TYPES.MongoDbService).to(MongoDbService).inSingletonScope();
   bind<PhotosService>(TYPES.PhotosService).to(PhotosService).inSingletonScope();
-  bind<EditPhotoService>(TYPES.UpdatePhotoService)
+  bind<EditPhotoService>(TYPES.EditPhotoService)
     .to(EditPhotoService)
     .inSingletonScope();
 });
@@ -47,6 +56,7 @@ export const servicesContainerModule = new ContainerModule((bind) => {
 // https://github.com/inversify/InversifyJS/blob/master/wiki/recipes.md#overriding-bindings-on-unit-tests
 export const singletons = new Container();
 singletons.load(
+  adminControllersContainerModule,
   constantsContainerModule,
   controllersContainerModule,
   servicesContainerModule

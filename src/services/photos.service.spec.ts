@@ -49,4 +49,48 @@ describe("photosService", () => {
       expect.assertions(1);
     });
   });
+
+  describe("photoMetadataFilterAdaptor", () => {
+    it("should throw an error if the provided filter is `undefined`", () => {
+      expect(photosService.photoMetadataFilterAdaptor).toThrow();
+      expect.assertions(1);
+    });
+
+    it("should return an object with a `date` field if the input filter has a `minDate` field", () => {
+      const input = { minDate: new Date() };
+      const result = photosService.photoMetadataFilterAdaptor(input);
+      expect(result.date).toBeDefined();
+      expect.assertions(1);
+    });
+
+    it("should return an object with a `date` field if the input filter has a `maxDate` field", () => {
+      const input = { maxDate: new Date() };
+      const result = photosService.photoMetadataFilterAdaptor(input);
+      expect(result.date).toBeDefined();
+      expect.assertions(1);
+    });
+
+    it("should return an object with a `date` field if the input filter has both `minDate` and `maxDate` fields", () => {
+      const dumbDate = new Date();
+      const input = { minDate: dumbDate, maxDate: dumbDate };
+      const result = photosService.photoMetadataFilterAdaptor(input);
+      expect(result.date).toBeDefined();
+      expect.assertions(1);
+    });
+
+    it("should return an object with a `titles` field if the input filter has a `title` field", () => {
+      const dumbTitle = "dumb title";
+      const input = { title: dumbTitle };
+      const result = photosService.photoMetadataFilterAdaptor(input);
+      expect(result.titles).toBe(dumbTitle);
+      expect.assertions(1);
+    });
+
+    it("should return an object with a `filename` field if the input filter has a `filename` field", () => {
+      const input = { filename: "dumb filename" };
+      const result = photosService.photoMetadataFilterAdaptor(input);
+      expect(result.filename).toBeDefined();
+      expect.assertions(1);
+    });
+  });
 });
