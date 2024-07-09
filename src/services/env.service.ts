@@ -9,6 +9,9 @@ export class EnvService implements EnvInterface {
   public readonly MONGO_CONNECTION_STRING: string;
   public readonly MONGO_DATABASE_NAME: string;
 
+  public readonly AUTH0_AUDIENCE: string;
+  public readonly AUTH0_DOMAIN: string;
+
   private readonly ENV: NodeJS.ProcessEnv;
 
   constructor(
@@ -22,6 +25,8 @@ export class EnvService implements EnvInterface {
       "MONGO_CONNECTION_STRING"
     );
     this.MONGO_DATABASE_NAME = this.getEnvVariable("MONGO_DATABASE_NAME");
+    this.AUTH0_AUDIENCE = this.getEnvVariable("AUTH0_AUDIENCE");
+    this.AUTH0_DOMAIN = this.getEnvVariable("AUTH0_DOMAIN");
   }
 
   private readonly getEnvVariable = (

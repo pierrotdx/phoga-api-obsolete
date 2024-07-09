@@ -3,6 +3,7 @@ import { photosRouter } from "./photo.router.js";
 import { LoggerInterface } from "../models/logger.model.js";
 import { TYPES, singletons } from "../inversify/index.js";
 import { errorCatchingWrapper } from "../middlewares/index.js";
+import { adminRouter } from "./admin/admin.router.js";
 
 const loggerService = singletons.get<LoggerInterface>(TYPES.LoggerService);
 
@@ -21,3 +22,4 @@ appRouter.get(
 );
 
 appRouter.use("/photos", photosRouter);
+appRouter.use("/restricted", adminRouter);

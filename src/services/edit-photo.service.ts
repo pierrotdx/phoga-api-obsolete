@@ -2,11 +2,7 @@ import formidable, { Part } from "formidable";
 import { inject, injectable } from "inversify";
 import { GcStorageService } from "./google-cloud/index.js";
 import { TYPES } from "../inversify/types.js";
-import {
-  DbInterface,
-  PhotoMetadata,
-  PhotoMetadataFilter,
-} from "../models/index.js";
+import { DbInterface, PhotoMetadata } from "../models/index.js";
 import { Request } from "express";
 import Formidable from "formidable/Formidable.js";
 import VolatileFile from "formidable/VolatileFile.js";
@@ -101,34 +97,7 @@ export class EditPhotoService {
     return destStream;
   };
 
-  photoMetadataFilterAdaptor = (
-    filter: PhotoMetadataFilter
-  ): Filter<PhotoMetadata> => {
-    if (!filter) {
-      throw new Error("no filter params");
-    }
-    const mongoFilter: Filter<PhotoMetadata> = {};
-    if (filter._id) {
-      mongoFilter._id = filter._id;
-    }
-    if (filter.minDate) {
-      mongoFilter.date = { $gte: filter.minDate };
-    }
-    if (filter.maxDate) {
-      mongoFilter.date = mongoFilter.date
-        ? { $and: [mongoFilter.date, { $lte: filter.maxDate }] }
-        : { $lte: filter.maxDate };
-    }
-    if (filter.title) {
-      mongoFilter.titles = filter.title;
-    }
-    if (filter.filename) {
-      mongoFilter.filename = { $regex: filter.filename };
-    }
-    return mongoFilter;
-  };
-
-  photoMetadataPatchAdaptor = (
+  public readonly photoMetadataPatchAdaptor = (
     patch: Partial<PhotoMetadata>
   ): UpdateFilter<PhotoMetadata> => {
     const patchQuery: UpdateFilter<PhotoMetadata> = {};
@@ -141,14 +110,16 @@ export class EditPhotoService {
     return patchQuery;
   };
 
-  deletePhoto = async (photoId: PhotoMetadata["_id"]): Promise<boolean> => {
+  public readonly deletePhoto = async (
+    photoId: PhotoMetadata["_id"]
+  ): Promise<boolean> => {
     const collectionName = DbCollection.PhotosMetadata;
     const fileName = photoId;
     await this.cloudStorageService.deleteFile({
       bucketName: this.PHOTOS_BUCKET,
       fileName,
     });
-    const mongoFilter = this.photoMetadataFilterAdaptor({
+    const mongoFilter = this.photosService.photoMetadataFilterAdaptor({
       _id: photoId,
     }) as Filter<PhotoMetadata>;
     await this.dbService.delete(collectionName, mongoFilter);

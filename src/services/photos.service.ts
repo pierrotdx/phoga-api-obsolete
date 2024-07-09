@@ -5,11 +5,13 @@ import {
   DbInterface,
   PhotoFormatOptions,
   PhotoMetadata,
+  PhotoMetadataFilter,
 } from "../models/index.js";
 import { TYPES } from "../inversify/index.js";
 import { Readable } from "stream";
 import { EnvService } from "./env.service.js";
 import { DbCollection } from "../models/db-collections.model.js";
+import { Filter } from "mongodb";
 
 @injectable()
 export class PhotosService {
@@ -78,8 +80,35 @@ export class PhotosService {
     return pipeline;
   };
 
-  insertPhotoMetadataInDb = (
+  public readonly insertPhotoMetadataInDb = (
     photoMetadata: PhotoMetadata
   ): Promise<PhotoMetadata["_id"]> =>
     this.dbService.insert(DbCollection.PhotosMetadata, photoMetadata);
+
+  public readonly photoMetadataFilterAdaptor = (
+    filter: PhotoMetadataFilter
+  ): Filter<PhotoMetadata> => {
+    if (!filter) {
+      throw new Error("no filter params");
+    }
+    const mongoFilter: Filter<PhotoMetadata> = {};
+    if (filter._id) {
+      mongoFilter._id = filter._id;
+    }
+    if (filter.minDate) {
+      mongoFilter.date = { $gte: filter.minDate };
+    }
+    if (filter.maxDate) {
+      mongoFilter.date = mongoFilter.date
+        ? { $and: [mongoFilter.date, { $lte: filter.maxDate }] }
+        : { $lte: filter.maxDate };
+    }
+    if (filter.title) {
+      mongoFilter.titles = filter.title;
+    }
+    if (filter.filename) {
+      mongoFilter.filename = { $regex: filter.filename };
+    }
+    return mongoFilter;
+  };
 }
